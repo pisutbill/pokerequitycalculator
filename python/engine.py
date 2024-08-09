@@ -2,7 +2,6 @@
 #rank goes from 2 to 13 with 13 being Ace
 #suit being c d h s (2, 'c')
 import re
-
 #pip install more_itertools
 class Hand:
     rank_dict = {'a':14, 'k':13, 'q':12, 'j':11}
@@ -77,11 +76,32 @@ class Hand:
     def check_straight_flush(self):
         return self.check_flush() and self.check_straight()
     
+    #def sliding_window(arr, k):
+    #return [arr[i:i+k] for i in range(len(arr) - k + 1)]
+
+    
     def check_four_of_kind(self):
+        rank = [t[0] for t in self.card_list]
+        windowed_list = [rank[i:i+4] for i in range(len(rank) - 4 + 1)]
+        for window in windowed_list:
+            if all([x == window[0] for x in window]):
+                print(window)
+                return True
+        print(windowed_list)
+        return False
+    
+    def check_full_house(self):
         pass
     
     def check_three_of_kind(self):
-        pass
+        rank = [t[0] for t in self.card_list]
+        windowed_list = [rank[i:i+3] for i in range(len(rank) - 3 + 1)]
+        for window in windowed_list:
+            if all([x == window[0] for x in window]):
+                print(window)
+                return True
+        print(windowed_list)
+        return False
 
     def check_two_pair(self):
         pass
@@ -89,3 +109,6 @@ class Hand:
     def check_one_pair(self):
         pass
     
+hand = Hand('4d4h4c4sjs')
+print(hand.check_four_of_kind())
+three = Hand('4h4c4sjhjs')
