@@ -5,21 +5,15 @@ import re
 #pip install more_itertools
 class Hand:
     rank_dict = {'a':14, 'k':13, 'q':12, 'j':11}
-    suit_pattern = r'[cdhs]'
-    int_pattern = r'\d+'
     handStength = -1 #8 for SF 1 is highcard
-    
+        
+
     def __init__(self, hand_string):
         self.card_list = []
         self.read_handstring(hand_string)
-        #this part split gets the list of card rank from string
-        #sort card
-        #tuples_list.sort(key=lambda x: x[0])
-        
-        
-                
-    #read input and check and sort
+    
     def read_handstring(self, hand_string):
+        suit_pattern = r'[cdhs]'
         non_transformed= [item for item in re.split(self.suit_pattern, hand_string) if item]
         rank_list = []
         for char in non_transformed:
@@ -45,7 +39,7 @@ class Hand:
         self.card_list = list(zip(rank_list, suit_list))
         
         self.card_list.sort(key=lambda x: x[0])
-
+        
     def check_flush(self):
         # Check if all suits are the same
         suits = [t[1] for t in self.card_list]
@@ -56,12 +50,8 @@ class Hand:
         if self.check_wheel():
             return True
         
-        # Extract and sort ranks
-        ranks = [t[0] for t in self.card_list]
-        ranks.sort()  # Ensure ranks are in ascending order
-        
         # Check if ranks are consecutive
-        return all(ranks[i] + 1 == ranks[i + 1] for i in range(len(ranks) - 1))
+        return all(self.card_list[i][0] + 1 == self.card_list[i + 1][0] for i in range(len(self.card_list) - 1))
     
     def check_wheel(self):
         if self.card_list[4][0] == 14:
@@ -76,39 +66,44 @@ class Hand:
     def check_straight_flush(self):
         return self.check_flush() and self.check_straight()
     
-    #def sliding_window(arr, k):
-    #return [arr[i:i+k] for i in range(len(arr) - k + 1)]
 
     
     def check_four_of_kind(self):
-        rank = [t[0] for t in self.card_list]
-        windowed_list = [rank[i:i+4] for i in range(len(rank) - 4 + 1)]
+        windowed_list = [self.card_list[i:i+4] for i in range(len(self.card_list) - 4 + 1)]
         for window in windowed_list:
-            if all([x == window[0] for x in window]):
+            if all([x[0] == window[0][0] for x in window]):
                 print(window)
                 return True
         print(windowed_list)
         return False
     
     def check_full_house(self):
-        pass
+        first_three = self.card_list[:3]
+        last_two = self.card_list[3:]
+        return all(x[0] == first_three[0][0] for x in first_three) and all(y[0] == last_two[0][0] for y in last_two)
     
     def check_three_of_kind(self):
-        rank = [t[0] for t in self.card_list]
-        windowed_list = [rank[i:i+3] for i in range(len(rank) - 3 + 1)]
+        windowed_list = [self.card_list[i:i+3] for i in range(len(self.card_list) - 3 + 1)]
         for window in windowed_list:
-            if all([x == window[0] for x in window]):
+            if all([x[0] == window[0][0] for x in window]):
                 print(window)
                 return True
         print(windowed_list)
         return False
 
     def check_two_pair(self):
-        pass
+        windowed_list = [self.card_list[i:i+2] for i in range(len(self.card_list)-2+1)]
+        pair_count = 0
+        for window in windowed_list:
+            if all([x[0] == window[0][0] for x in window]):
+                pair_count += 1
+            if pair_count == 2:
+                    return True
+        return False
     
     def check_one_pair(self):
-        pass
-    
-hand = Hand('4d4h4c4sjs')
-print(hand.check_four_of_kind())
-three = Hand('4h4c4sjhjs')
+        windowed_list = [self.card_list[i:i+1] for i in range(len(self.card_list)-1+1)]
+        for window in windowed_list:
+            if all([x[0] == window[0][0] for x in window]):
+                return True
+        return False
