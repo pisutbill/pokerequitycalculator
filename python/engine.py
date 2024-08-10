@@ -11,7 +11,7 @@ class Hand:
         self.assign_hand_strength()
 
     def read_handstring(self, hand_string):
-        rank_dict = {"a": 14, "k": 13, "q": 12, "j": 11}
+        rank_dict = {"a": 14, "k": 13, "q": 12, "j": 11, "t": 10}
         suit_pattern = r"[cdhs]"
         non_transformed = [item for item in re.split(suit_pattern, hand_string) if item]
         rank_list = []
@@ -26,7 +26,6 @@ class Hand:
                 raise ValueError("Wrong number of card rank")
             if rank < 2 or rank > 14:
                 raise ValueError("Invalid card rank " + str(rank))
-        # get the suit
 
         suit_list = []
         for char in hand_string:
@@ -38,6 +37,9 @@ class Hand:
         self.card_list = list(zip(rank_list, suit_list))
 
         self.card_list.sort(key=lambda x: x[0])
+
+        if any(self.card_list.count(x) > 1 for x in self.card_list):
+            raise ValueError("duplicate cards")
 
     def assign_hand_strength(self):
         hand_checks = [
@@ -72,7 +74,7 @@ class Hand:
                     return 1
                 elif self.card_list[i][0] < another.card_list[i][0]:
                     return -1
-            return 0
+        return 0
 
     def check_flush(self):
         return all(card[1] == self.card_list[0][1] for card in self.card_list)
@@ -197,5 +199,5 @@ class Hand:
         print("printing")
         print(self.card_list)
 
-    
-    
+
+hand = Hand("4d4s3s2djh")

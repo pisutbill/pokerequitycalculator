@@ -67,12 +67,16 @@ class TestHandMethods(unittest.TestCase):
     # High Card Tests
     def test_high_card_with_ace(self):
         hand = Hand("ahksqdjc9s")
-        self.assertEqual(hand.hand_strength, 0)  # Assuming high card is the lowest rank with strength 0
+        self.assertEqual(
+            hand.hand_strength, 0
+        )  # Assuming high card is the lowest rank with strength 0
 
     def test_high_card_with_low_cards(self):
         hand = Hand("2c4h6s8dkd")
-        self.assertEqual(hand.hand_strength, 0)  # Assuming high card is the lowest rank with strength 0
-        
+        self.assertEqual(
+            hand.hand_strength, 0
+        )  # Assuming high card is the lowest rank with strength 0
+
     def test_compare_high_card_equal(self):
         hand1 = Hand("ahkdqcjd9s")  # High card: Ace, King, Queen, Jack, 9
         hand2 = Hand("adkhqcjs9d")  # High card: Ace, King, Queen, Jack, 9
@@ -107,7 +111,7 @@ class TestHandMethods(unittest.TestCase):
 
     # Three of a Kind Tests
     def test_compare_three_of_a_kind_equal(self):
-        hand1 = Hand("8s8d8h3c2d")  # Three of a kind: 8s
+        hand1 = Hand("8s8d8h4c2d")  # Three of a kind: 8s
         hand2 = Hand("8c8h8d4s2c")  # Three of a kind: 8s
         self.assertEqual(hand1.compare(hand2), 0)
 
@@ -124,18 +128,18 @@ class TestHandMethods(unittest.TestCase):
 
     def test_compare_straight_higher_wins(self):
         hand1 = Hand("5s6d7h8c9d")  # 9-high straight
-        hand2 = Hand("6h7c8d9sTc")  # 10-high straight
+        hand2 = Hand("6h7c8d9s10c")  # 10-high straight
         self.assertEqual(hand1.compare(hand2), -1)
 
     # Flush Tests
     def test_compare_flush_equal(self):
-        hand1 = Hand("2s4s6s8sTs")  # Flush with Ts high
-        hand2 = Hand("2d4d6d8dTd")  # Flush with Ts high
+        hand1 = Hand("2s4s6s8sts")  # Flush with Ts high
+        hand2 = Hand("2d4d6d8dtd")  # Flush with Ts high
         self.assertEqual(hand1.compare(hand2), 0)
 
     def test_compare_flush_higher_wins(self):
         hand1 = Hand("2s4s6s8s9s")  # Flush with 9s high
-        hand2 = Hand("2d4d6d8dTs")  # Flush with Ts high
+        hand2 = Hand("2d4d6d8dtd")  # Flush with Ts high
         self.assertEqual(hand1.compare(hand2), -1)
 
     # Full House Tests
@@ -151,7 +155,7 @@ class TestHandMethods(unittest.TestCase):
 
     # Four of a Kind Tests
     def test_compare_four_of_a_kind_equal(self):
-        hand1 = Hand("4s4hjs4c4d")  # Four of a kind: 4s
+        hand1 = Hand("4s4h4s4c7d")  # Four of a kind: 4s
         hand2 = Hand("4h4d4c4s7s")  # Four of a kind: 4s
         self.assertEqual(hand1.compare(hand2), 0)
 
@@ -168,8 +172,12 @@ class TestHandMethods(unittest.TestCase):
 
     def test_compare_straight_flush_higher_wins(self):
         hand1 = Hand("5s6s7s8s9s")  # 9-high straight flush
-        hand2 = Hand("6h7h8h9hTh")  # 10-high straight flush
+        hand2 = Hand("6h7h8h9hth")  # 10-high straight flush
         self.assertEqual(hand1.compare(hand2), -1)
+
+    def test_duplicate_card(self):
+        hand = Hand("4d4s3s2djh")
+        self.assertRaises
 
 
 if __name__ == "__main__":
