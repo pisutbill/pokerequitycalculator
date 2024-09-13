@@ -155,7 +155,7 @@ class TestHandMethods(unittest.TestCase):
 
     # Four of a Kind Tests
     def test_compare_four_of_a_kind_equal(self):
-        hand1 = Hand("4s4h4s4c7d")  # Four of a kind: 4s
+        hand1 = Hand("4s4h4d4c7d")  # Four of a kind: 4s
         hand2 = Hand("4h4d4c4s7s")  # Four of a kind: 4s
         self.assertEqual(hand1.compare(hand2), 0)
 

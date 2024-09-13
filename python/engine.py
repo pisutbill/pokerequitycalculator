@@ -1,6 +1,10 @@
 import re
 
-
+rank_dict = {"a": 14, "k": 13, "q": 12, "j": 11, "t": 10}
+suit_dict = {"c": 1, "d": 2, "h": 3, "s": 4}
+inv_rank = {v: k for k, v in rank_dict.items()}
+inv_suit = {v: k for k, v in suit_dict.items()}
+hand_str_dict = {0: "high card", 1: "one pair", 2: "two pair", 3: "three of a kind", 4: "straight", 5: "flush", 6: "full house", 7: "four of a kind", 8: "straight flush"}
 ### need to re sort the all the pairs
 class Hand:
 
@@ -11,7 +15,6 @@ class Hand:
         self.assign_hand_strength()
 
     def read_handstring(self, hand_string):
-        rank_dict = {"a": 14, "k": 13, "q": 12, "j": 11, "t": 10}
         suit_pattern = r"[cdhs]"
         non_transformed = [item for item in re.split(suit_pattern, hand_string) if item]
         rank_list = []
@@ -19,28 +22,28 @@ class Hand:
             if char in rank_dict:
                 rank_list.append(rank_dict[char])
             else:
-                rank_list.append(int(char))
+                rank_list.append(int(char)) #put the number rank in, transform a,k,q,j to number
 
-        for rank in rank_list:
-            if len(rank_list) != 5:
+        if len(rank_list) != 5:
                 raise ValueError("Wrong number of card rank")
+        for rank in rank_list:
             if rank < 2 or rank > 14:
                 raise ValueError("Invalid card rank " + str(rank))
 
         suit_list = []
         for char in hand_string:
             if char in ["c", "d", "h", "s"]:
-                suit_list.append(char)
+                suit_list.append(suit_dict[char])
         if len(suit_list) != 5:
             raise ValueError("Invalid number of card suits")
 
         self.card_list = list(zip(rank_list, suit_list))
+    
 
-        self.card_list.sort(key=lambda x: x[0])
+        self.card_list.sort(key=lambda x: (x[0], x[1])) #change to sort by rank as well
 
         if any(self.card_list.count(x) > 1 for x in self.card_list):
             raise ValueError("duplicate cards")
-
     def assign_hand_strength(self):
         hand_checks = [
             (self.check_straight_flush, 8),  # Straight Flush
@@ -90,31 +93,17 @@ class Hand:
     def check_wheel(self):
         first_four = self.card_list[:-1]
         first_four_rank = [t[0] for t in first_four]
-        if first_four_rank == [2, 3, 4, 5] and self.card_list[4][0] == 14:
-            temp = self.card_list[4:] + first_four
-            self.card_list = temp
-            return True
-        return False
+        return first_four_rank == [2, 3, 4, 5] and self.card_list[4][0] == 14
 
     def check_straight_flush(self):
         return self.check_flush() and self.check_straight()
 
     def check_four_of_kind(self):
-        four_kind = None
-        windowed_list = [
-            self.card_list[i : i + 4] for i in range(len(self.card_list) - 4 + 1)
-        ]
-        for window in windowed_list:
-            if all([x[0] == window[0][0] for x in window]):
-                four_kind = window
-        if four_kind:
-            temp_list = []
-            temp_list += four_kind
-            for card in self.card_list:
-                if card not in temp_list:
-                    temp_list += [card]
-            self.card_list = temp_list
-            return True
+        rank_count = self.get_rank_counts()
+
+        for rank,count in rank_count.items():
+            if count == 4:
+                return True
         return False
 
     def check_full_house(self):
@@ -125,79 +114,77 @@ class Hand:
             rank = card[0]
             rank_counts[rank] = rank_counts.get(rank, 0) + 1
 
-        three_kind = None
-        pair = None
+        three_kind = False
+        pair = False
 
         # Identify three of a kind and pair
         for rank, count in rank_counts.items():
             if count == 3:
-                three_kind = [card for card in self.card_list if card[0] == rank]
+                three_kind = True
             elif count == 2:
-                pair = [card for card in self.card_list if card[0] == rank]
+                pair = True
 
         # Check if both three of a kind and a pair are found
         if three_kind and pair:
-            self.card_list = three_kind + pair
             return True
 
         return False
 
     def check_three_of_kind(self):
-        three_kind = None
-        windowed_list = [
-            self.card_list[i : i + 3] for i in range(len(self.card_list) - 3 + 1)
-        ]
-        for window in windowed_list:
-            if all([x[0] == window[0][0] for x in window]):
-                three_kind = window
-        if three_kind:
-            temp_list = []
-            temp_list += three_kind
-            for card in self.card_list:
-                if card not in temp_list:
-                    temp_list += card
-            return True
+        rank_count = self.get_rank_counts()
+
+        for rank,count in rank_count.items():
+            if count == 3:
+                return True
         return False
 
     def check_two_pair(self):
-        first_pair = None
-        second_pair = None
-        windowed_list = [
-            self.card_list[i : i + 2] for i in range(len(self.card_list) - 2 + 1)
-        ]
-        for window in windowed_list:
-            if all([x[0] == window[0][0] for x in window]):
-                if not first_pair:
-                    first_pair = window
-                elif first_pair and not second_pair:
-                    second_pair = window
-        if first_pair and second_pair:
-            temp_list = first_pair + second_pair
-            for card in self.card_list:
-                if card not in temp_list:
-                    temp_list += card
+        rank_count = self.get_rank_counts()
+        pair_count = 0
+
+        for rank,count in rank_count.items():
+            if count == 2:
+                pair_count += 1
+        if pair_count == 2:
             return True
         return False
+
 
     def check_one_pair(self):
-        pair = None
-        windowed_list = [
-            self.card_list[i : i + 2] for i in range(len(self.card_list) - 1)
-        ]
-        for window in windowed_list:
-            if all([x[0] == window[0][0] for x in window]):
-                pair = window
-        if pair:
-            tempList = pair
-            for card in self.card_list:
-                if card not in tempList:
-                    tempList += card
-            return True
+        rank_count = self.get_rank_counts()
+
+        for rank,count in rank_count.items():
+            if count == 2:
+                return True
         return False
 
+    def compare_one_pair(self, another):
+        pass
+
+    def get_rank_counts(self):
+        rank_counts = {}  # Dictionary to count occurrences of each rank
+
+        # Count occurrences of each rank
+        for card in self.card_list:
+            rank = card[0]
+            rank_counts[rank] = rank_counts.get(rank, 0) + 1
+        return rank_counts
+
     def print(self):
-        print("printing")
-        print(self.card_list)
+        printString = ""
+        for card in self.card_list:
+            rank = card[0]
+            suit = card[1]
+            if rank not in inv_rank:
+                printString += str(rank)
+            else:
+                printString += inv_rank[rank]
+            printString += inv_suit[suit]
+            printString = printString + " "
+    
+    def print_handStrength(self):
+        print(hand_str_dict[self.hand_strength])
 
 
-hand = Hand("4d4s3s2djh")
+
+hand = Hand("2h3d5sac4s")
