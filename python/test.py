@@ -98,6 +98,11 @@ class TestHandMethods(unittest.TestCase):
         hand2 = Hand("4h4c5d7s9c")  # Pair of 4s
         self.assertEqual(hand1.compare(hand2), -1)
 
+    def test_compare_different_one_pair(self):
+        hand1 = Hand("4s4d3hjh7s")
+        hand2 = Hand("7s7d3hjh6d")
+        self.assertEqual(hand1.compare(hand2), -1)
+
     # Two Pair Tests
     def test_compare_two_pair_equal(self):
         hand1 = Hand("3s3d5h5c9d")  # Two pair: 3s and 5s
@@ -120,6 +125,16 @@ class TestHandMethods(unittest.TestCase):
         hand2 = Hand("8c8h8d4s2c")  # Three of a kind: 8s
         self.assertEqual(hand1.compare(hand2), -1)
 
+    def test_compare_three_of_a_kind_kicker_wins(self):
+        hand1 = Hand("7s7d7h5c2d")  # Three of a kind: 7s
+        hand2 = Hand("7s7d7h3c2d")  # Three of a kind: 8s
+        self.assertEqual(hand1.compare(hand2), 1)
+
+    def test_compare_three_of_a_kind_second_kicker_wins(self):
+        hand1 = Hand("7s7d7h5c4d")  # Three of a kind: 7s
+        hand2 = Hand("7s7d7h5c3d")  # Three of a kind: 8s
+        self.assertEqual(hand1.compare(hand2), 1)
+
     # Straight Tests
     def test_compare_straight_equal(self):
         hand1 = Hand("5s6d7h8c9d")  # 9-high straight
@@ -129,6 +144,11 @@ class TestHandMethods(unittest.TestCase):
     def test_compare_straight_higher_wins(self):
         hand1 = Hand("5s6d7h8c9d")  # 9-high straight
         hand2 = Hand("6h7c8d9s10c")  # 10-high straight
+        self.assertEqual(hand1.compare(hand2), -1)
+
+    def test_compare_straight_ace(self):
+        hand1 = Hand("5s3d2dah4s")  # 5-high straight
+        hand2 = Hand("askdjdqhts")  # a-high straight
         self.assertEqual(hand1.compare(hand2), -1)
 
     # Flush Tests
@@ -152,6 +172,16 @@ class TestHandMethods(unittest.TestCase):
         hand1 = Hand("3s3c3h5s5d")  # Full House: 3s over 5s
         hand2 = Hand("4d4h4c5d5h")  # Full House: 4s over 5s
         self.assertEqual(hand1.compare(hand2), -1)
+
+    def test_compare_full_house_kicker(self):
+        hand1 = Hand("as4d4c4h4s") #quad 4, a kicker
+        hand2 = Hand("4d4c4h4s5d") #quad 4, 5 kicker
+        self.assertEqual(hand1.compare(hand2), 1)
+
+    def test_compare_full_house_kicker(self):
+        hand1 = Hand("as4d4c4h4s") #quad 4, a kicker
+        hand2 = Hand("4d4c4h4sjd") #quad 4, 5 kicker
+        self.assertEqual(hand1.compare(hand2), 1)
 
     # Four of a Kind Tests
     def test_compare_four_of_a_kind_equal(self):
